@@ -1,10 +1,15 @@
 package com.amrit.springBoot.service.impl;
 
+import com.amrit.springBoot.entity.Subject;
 import com.amrit.springBoot.entity.Student;
 import com.amrit.springBoot.exception.ConflictException;
 import com.amrit.springBoot.exception.NotFoundException;
+import com.amrit.springBoot.repo.SubjectRepository;
 import com.amrit.springBoot.repo.StudentRepository;
 import com.amrit.springBoot.service.StudentService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,11 +17,10 @@ import java.util.Optional;
 
 @Service
 public class StudentServiceImpl implements StudentService {
-    private final StudentRepository studentRepository;
-
-    public StudentServiceImpl(StudentRepository studentRepository) {
-        this.studentRepository = studentRepository;
-    }
+    @Autowired
+    private StudentRepository studentRepository;
+    @Autowired
+    private SubjectRepository subjectRepository;
 
     @Override
     public Student saveStudent(Student student) {
@@ -24,7 +28,13 @@ public class StudentServiceImpl implements StudentService {
         if (studentByEmail != null){
             throw new ConflictException("Email already exists: " + student.getEmail());
         }
-        return studentRepository.save(student);
+        Student savedStudent =  studentRepository.save(student);
+        List<Subject> subject = student.getSubjects();
+        for (Subject s : subject) {
+            s.setStudent(savedStudent);
+        }
+        subjectRepository.saveAll(subject);
+        return savedStudent;
     }
 
     @Override
@@ -48,5 +58,10 @@ public class StudentServiceImpl implements StudentService {
             return student;
         }
         throw new NotFoundException("Student with email " + email + " not found");
+    }
+
+    @Override
+    public Page<Student> searchStudents(String keyword, Pageable pageable) {
+        return studentRepository.searchByName(keyword, pageable);
     }
 }
