@@ -6,7 +6,9 @@ import com.amrit.springBoot.exception.ConflictException;
 import com.amrit.springBoot.exception.NotFoundException;
 import com.amrit.springBoot.repo.SubjectRepository;
 import com.amrit.springBoot.repo.StudentRepository;
+import com.amrit.springBoot.service.MailSenderService;
 import com.amrit.springBoot.service.StudentService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,11 +18,14 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class StudentServiceImpl implements StudentService {
     @Autowired
     private StudentRepository studentRepository;
     @Autowired
     private SubjectRepository subjectRepository;
+    @Autowired
+    private MailSenderService mailSenderService;
 
     @Override
     public Student saveStudent(Student student) {
@@ -34,6 +39,9 @@ public class StudentServiceImpl implements StudentService {
             s.setStudent(savedStudent);
         }
         subjectRepository.saveAll(subject);
+        mailSenderService.sendEmail(student.getEmail(), "Record Added",
+                "Dear " + student.getName() + " You have been added as a student in the system");
+        log.info("Student with email {} has been saved successfully", student.getEmail());
         return savedStudent;
     }
 
