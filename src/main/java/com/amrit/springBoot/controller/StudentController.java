@@ -1,6 +1,8 @@
 package com.amrit.springBoot.controller;
 
 import com.amrit.springBoot.entity.Student;
+import com.amrit.springBoot.exception.ConflictException;
+import com.amrit.springBoot.exception.NotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -27,7 +29,7 @@ public class StudentController {
         student.setId((long) (students.size() + 1));
         for (Student s : students) {
             if (s.getEmail().equals(student.getEmail())) {
-                return null;
+                throw new ConflictException("Email already exists: " + student.getEmail());
             }
         }
         students.add(student);
@@ -36,6 +38,9 @@ public class StudentController {
 
     @GetMapping("/all")
     public List<Student> getAllStudents() {
+        if (students.isEmpty()){
+            throw new NotFoundException("No students found");
+        }
         return students;
     }
 
@@ -48,7 +53,7 @@ public class StudentController {
                 return "Student with ID " + id + " updated successfully. Updated Name: " + updatedStudent.getName() + ", Updated Email: " + updatedStudent.getEmail();
             }
         }
-        return "Student with ID " + id + " not found";
+        throw new NotFoundException("Student with ID " + id + " not found");
     }
 
     @PatchMapping("/patchUpdate/{id}")  //PutMapping can also be used here
@@ -60,7 +65,7 @@ public class StudentController {
 
             }
         }
-        return "Student with ID " + id + " not found.";
+        throw new NotFoundException("Student with ID " + id + " not found");
     }
 
 
@@ -72,6 +77,6 @@ public class StudentController {
                 return "Student with ID " + id + " deleted successfully.";
             }
         }
-        return "Student with ID " + id + " not found.";
+        throw new NotFoundException("Student with ID " + id + " not found");
     }
 }
