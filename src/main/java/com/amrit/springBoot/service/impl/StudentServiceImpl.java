@@ -39,8 +39,8 @@ public class StudentServiceImpl implements StudentService {
             s.setStudent(savedStudent);
         }
         subjectRepository.saveAll(subject);
-        mailSenderService.sendEmail(student.getEmail(), "Record Added",
-                "Dear " + student.getName() + " You have been added as a student in the system");
+//        mailSenderService.sendEmail(student.getEmail(), "Record Added",
+//                "Dear " + student.getName() + " You have been added as a student in the system");
         log.info("Student with email {} has been saved successfully", student.getEmail());
         return savedStudent;
     }
